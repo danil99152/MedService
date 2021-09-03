@@ -1,3 +1,5 @@
+#TODO: добавить предупреждение, что меньше 5 симптомов; сделать поверх экранов; сделать выезд приложения по кнопке (метод move)
+
 import sys
 from PyQt5 import QtWidgets
 import MedService
@@ -8,7 +10,11 @@ class MainService(QtWidgets.QMainWindow, MedService.Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
-        self.pushButton.clicked.connect(lambda: self.getSymptoms(self.GettingSymptoms.toPlainText()))
+        self.getResult.clicked.connect(lambda: self.getSymptoms(self.GettingSymptoms.toPlainText()))
+        # self.backArrow.clicked.connect(self.get_back)
+
+    # def get_back(self):
+
 
     def getSymptoms(self, symptoms): #Здесь вся обработка
         data = {'user_id': 'med-1-doctor-1',
@@ -22,8 +28,9 @@ class MainService(QtWidgets.QMainWindow, MedService.Ui_MainWindow):
                                  data=json.dumps(data),
                                  headers=headers
                                  )
+        self.Result.clear()
         for diag in response.json()['diag']:
-            self.Result.addItem(diag[1])
+            self.Result.addItem(diag[0] +" "+ diag[1])
 
 def main():
     app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
