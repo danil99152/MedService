@@ -6,10 +6,10 @@ import requests as requests
 import json
 
 class MainService(QtWidgets.QMainWindow, MedService.Ui_MainWindow):
-    width = 312
-    height = 493
-    y_start = 0
     user32 = ctypes.windll.user32
+    width = int(user32.GetSystemMetrics(0) * 0.22)
+    height = int(user32.GetSystemMetrics(1) * 0.64)
+    y_start = 0
     med_id = ""
 
     def __init__(self):
@@ -21,7 +21,7 @@ class MainService(QtWidgets.QMainWindow, MedService.Ui_MainWindow):
         self.clearSymptoms.clicked.connect(self.GettingSymptoms.clear)
 
     def get_forward(self):
-        new_width = 21
+        new_width = int(self.user32.GetSystemMetrics(0)*0.015)
         if self.expanded:
             width = int(self.user32.GetSystemMetrics(0) - self.width * 0.065)
             self.GettingSymptoms.hide()
