@@ -3,12 +3,12 @@ from PyQt5 import QtCore, QtWidgets
 
 class Ui_MainWindow(object):
     _translate = QtCore.QCoreApplication.translate
-    expanded = True
+    expanded = False
     def setupUi(self, MainWindow):
-        width = 312
+        width = 21
         height = 493
         user32 = ctypes.windll.user32
-        MainWindow.move(user32.GetSystemMetrics(0)-width, 0)
+        MainWindow.move(int(user32.GetSystemMetrics(0) - width), 0)
         MainWindow.setObjectName("MainWindow")
         MainWindow.setFixedSize(width, height)
         self.moveButton = QtWidgets.QPushButton(MainWindow)
@@ -34,6 +34,10 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(self._translate("MainWindow", "MedService"))
         MainWindow.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
         MainWindow.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint)
-        self.moveButton.setText(">")
+        self.moveButton.setText("<")
         self.getResult.setText(self._translate("MainWindow", "Не менее 6 симптомов"))
         self.clearSymptoms.setText(self._translate("MainWindow", "Очистить поле ввода"))
+        self.GettingSymptoms.hide()
+        self.Result.hide()
+        self.getResult.hide()
+        self.clearSymptoms.hide()
