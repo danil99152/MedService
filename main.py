@@ -52,19 +52,9 @@ class MainService(QtWidgets.QMainWindow, MedService.Ui_MainWindow):
             self.getResult.setText(self._translate("MainWindow", "Получить результат"))
         else: self.getResult.setText(self._translate("MainWindow", "Не менее 5 симптомов"))
 
-    def logging(self, response):
-        f = open("logs/log.txt", "a")
-        if os.path.getsize('logs/log.txt') >= 10000000:
-            os.remove('logs/log.txt')
-        f.write(str(datetime.now().isoformat()) + ":\n")
-        f.write("Status code: " + str(response.status_code) + "\n")
-        f.write("Request processed: " + str(response.ok) + "\n")
-        f.write("Content: " + response.text + "\n")
-        f.close()
-
     def getSymptoms(self, symptoms): #Здесь вся обработка
         try:
-            f = open("configs/config.json", "r")
+            f = open("config.json", "r")
             params = json.loads(f.read())
             f.close()
             data = {'user_id': self.med_id,
@@ -82,23 +72,29 @@ class MainService(QtWidgets.QMainWindow, MedService.Ui_MainWindow):
                 self.Result.clear()
                 if params['write_log'] == "True":
                     try:
-                        self.logging(response)
-                    except:
-                        os.mkdir("logs")
-                        self.logging(response)
+                        f = open("log.txt", "a")
+                        if os.path.getsize('log.txt') >= 10000000:
+                            os.remove('log.txt')
+                        f.write(str(datetime.now().isoformat()) + ":\n")
+                        f.write("Status code: " + str(response.status_code) + "\n")
+                        f.write("Request processed: " + str(response.ok) + "\n")
+                        f.write("Content: " + response.text + "\n")
+                        f.close()
+                    except Exception as e:
+                        self.Result.addItem(str(e))
                 if len(response.json()['diag']) == 0:
                     self.Result.addItem("Нет ответа из-за недостаточного количества данных или некорректного ввода")
                 else:
                     for diag in response.json()['diag']:
                         self.Result.addItem(diag[0] + " " + diag[1])
             except Exception as e:
-                f = open("logs/log.txt", "a")
+                f = open("log.txt", "a")
                 f.write(str(datetime.now().isoformat()) + ":\n")
                 f.write("Exception: " + str(e) + ":\n")
                 f.close()
         except Exception as e:
             self.Result.addItem(str(e))
-            f = open("logs/log.txt", "a")
+            f = open("log.txt", "a")
             f.write(str(datetime.now().isoformat()) + ":\n")
             f.write("Exception: " + str(e) + ":\n")
             f.close()
