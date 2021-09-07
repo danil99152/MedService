@@ -1,5 +1,8 @@
 import ctypes
+import os
 import sys
+from datetime import datetime
+
 from PyQt5 import QtWidgets
 import MedService
 import requests as requests
@@ -45,25 +48,60 @@ class MainService(QtWidgets.QMainWindow, MedService.Ui_MainWindow):
 
     def validate_input(self):
         text = self.GettingSymptoms.toPlainText()
-        if len(text.split(',')) >= 6:
+        if len(text.split(',')) >= 5:
             self.getResult.setText(self._translate("MainWindow", "Получить результат"))
-        else: self.getResult.setText(self._translate("MainWindow", "Не менее 6 симптомов"))
+        else: self.getResult.setText(self._translate("MainWindow", "Не менее 5 симптомов"))
+
+    def logging(self, response):
+        f = open("logs/log.txt", "a")
+        if os.path.getsize('logs/log.txt') >= 10000000:
+            os.remove('logs/log.txt')
+        f.write(str(datetime.now().isoformat()) + ":\n")
+        f.write("Status code: " + str(response.status_code) + "\n")
+        f.write("Request processed: " + str(response.ok) + "\n")
+        f.write("Content: " + response.text + "\n")
+        f.close()
 
     def getSymptoms(self, symptoms): #Здесь вся обработка
-        data = {'user_id': self.med_id,
-                'symptoms': symptoms
-                }
-        headers = {'Authorization': 'ae8e8b3e727ab44b014f9e5285348c59b67d27c56fa3d32d04d1709d9e37703a',
-                   'Content-Type': 'application/json'
-                   }
-        url = 'https://top3.sbermed.ai/api/calls'
-        response = requests.post(url,
-                                 data=json.dumps(data),
-                                 headers=headers
-                                 )
-        self.Result.clear()
-        for diag in response.json()['diag']:
-            self.Result.addItem(diag[0] +" "+ diag[1])
+        try:
+            f = open("configs/config.json", "r")
+            params = json.loads(f.read())
+            f.close()
+            data = {'user_id': self.med_id,
+                    'symptoms': symptoms
+                    }
+            headers = {'Authorization': params['token'],
+                       'Content-Type': 'application/json'
+                       }
+            url = 'https://top3.sbermed.ai/api/calls'
+            try:
+                response = requests.post(url,
+                                         data=json.dumps(data),
+                                         headers=headers
+                                         )
+                self.Result.clear()
+                if params['write_log'] == "True":
+                    try:
+                        self.logging(response)
+                    except:
+                        os.mkdir("logs")
+                        self.logging(response)
+                if len(response.json()['diag']) == 0:
+                    self.Result.addItem("Нет ответа из-за недостаточного количества данных или некорректного ввода")
+                else:
+                    for diag in response.json()['diag']:
+                        self.Result.addItem(diag[0] + " " + diag[1])
+            except Exception as e:
+                f = open("logs/log.txt", "a")
+                f.write(str(datetime.now().isoformat()) + ":\n")
+                f.write("Exception: " + str(e) + ":\n")
+                f.close()
+        except Exception as e:
+            self.Result.addItem(str(e))
+            f = open("logs/log.txt", "a")
+            f.write(str(datetime.now().isoformat()) + ":\n")
+            f.write("Exception: " + str(e) + ":\n")
+            f.close()
 
 def main(med_id):
     MainService.med_id = med_id
@@ -73,5 +111,8 @@ def main(med_id):
     app.exec_()  # и запускаем приложение
 
 if __name__ == '__main__':
-    med_id = sys.argv[1]
+    try:
+        med_id = sys.argv[1]
+    except:
+        med_id = "med-1-doctor-1"
     main(med_id)

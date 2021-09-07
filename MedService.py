@@ -33,7 +33,7 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(self._translate("MainWindow", "MedService"))
+        MainWindow.setWindowTitle(self._translate("MainWindow", "Топ-3 диагнозов"))
         MainWindow.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
         MainWindow.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint)
         self.moveButton.setText("<")
